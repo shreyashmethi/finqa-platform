@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.venv/
+
+# Runtime data (SQLite DBs, checkpoints, uploads) and evaluation outputs
+backend/data/
+backend/runs/
+.env
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+*.tsbuildinfo

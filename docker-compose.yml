@@ -1,0 +1,35 @@
+# Local / single-host deployment.
+#   docker compose up --build            -> UI on http://localhost:8080
+# Load the test corpus (mounted read-only at /corpus):
+#   docker compose exec backend python -m app.cli seed --corpus /corpus
+services:
+  backend:
+    build: ./backend
+    environment:
+      FINQA_DATA_DIR: /data
+      # Replace these demo tokens (or wire up SSO) before exposing the service.
+      FINQA_AUTH_TOKENS: ${FINQA_AUTH_TOKENS:-analyst-token:alice:analyst,controller-token:carol:controller,auditor-token:arun:auditor,admin-token:adam:admin}
+      FINQA_LLM_MODEL: ${FINQA_LLM_MODEL:-}
+      FINQA_LOG_JSON: "true"
+      # For Postgres instead of SQLite, uncomment the db service and set:
+      # FINQA_DATABASE_URL: postgresql+psycopg://finqa:finqa@db:5432/finqa
+    volumes:
+      - finqa-data:/data
+      - ${CORPUS_DIR:-../finqa-testdata}:/corpus:ro
+    stop_grace_period: 30s  # lets in-flight runs pause at a checkpoint before exit
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+  # db:
+  #   image: postgres:16-alpine
+  #   environment: { POSTGRES_USER: finqa, POSTGRES_PASSWORD: finqa, POSTGRES_DB: finqa }
+  #   volumes: [ "pg-data:/var/lib/postgresql/data" ]
+
+volumes:
+  finqa-data:
+  # pg-data:
